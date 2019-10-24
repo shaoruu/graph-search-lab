@@ -7,12 +7,22 @@ class Graph
 private:
   Node *root;
 
+  bool dfsUntil(Node *, bool[], string);
+
+  bool ldsUntil(Node *, bool[], string, int);
+
 public:
   Graph();
 
-  string bfs(string);
+  // Breadth First Search
+  void bfs(string);
 
-  string dfs(string);
+  // Depth First Search
+  void dfs(string);
 
-  string lds(string, int);
+  // Limited Depth Search
+  void lds(string, int);
+
+  // Iterative Deepening Search
+  void ids(string, int);
 };

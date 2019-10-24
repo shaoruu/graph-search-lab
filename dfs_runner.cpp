@@ -10,12 +10,12 @@ int main()
 
   string s;
 
-  cout << "Looking for: ";
-
-  while (getline(cin, s))
+  while (true)
   {
-    cout << g.dfs(s) << endl;
-
     cout << "Looking for: ";
+
+    getline(cin, s);
+
+    g.dfs(s);
   }
 }

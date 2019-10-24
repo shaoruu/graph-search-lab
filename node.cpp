@@ -1,10 +1,14 @@
+#include <iostream>
 #include <vector>
 #include <string>
 
 #include "node.h"
 
+using namespace std;
+
 Node::Node(string c, int id) : value(c), id(id)
 {
+  cout << "- " << c << endl;
 }
 
 void Node::connect(Node *n)

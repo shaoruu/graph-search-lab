@@ -4,14 +4,17 @@
 #include <vector>
 #include <list>
 #include <string>
-#include <algorithm>
 
 #include "graph.h"
 
 using namespace std;
 
-Graph::Graph() : root(new Node("Bucharest", 0))
+Graph::Graph()
 {
+  cout << "List of cities: " << endl;
+  cout << "===============" << endl;
+
+  root = new Node("Bucharest", 0);
   Node *Giurgiu = new Node("Giurgiu", 1);
   Node *Pitesti = new Node("Pitesti", 2);
   Node *Craiova = new Node("Craiova", 3);
@@ -31,6 +34,11 @@ Graph::Graph() : root(new Node("Bucharest", 0))
   Node *Valslui = new Node("Valslui", 17);
   Node *Iasi = new Node("Iasi", 18);
   Node *Neamt = new Node("Neamt", 19);
+
+  cout << endl
+       << "with Bucharest as the starting point." << endl
+       << "==============="
+       << endl;
 
   Valslui->connect(Iasi);
 
@@ -72,7 +80,7 @@ Graph::Graph() : root(new Node("Bucharest", 0))
   root->connect(Urziceni);
 }
 
-string Graph::bfs(string target)
+void Graph::bfs(string target)
 {
   bool *visited = new bool[20];
   for (int i = 0; i < 20; i++)
@@ -80,7 +88,8 @@ string Graph::bfs(string target)
 
   queue<Node *> Q;
   vector<Node *> *edges;
-  string path = "\n";
+
+  cout << "\n";
 
   Q.push(root);
   visited[0] = true;
@@ -92,9 +101,12 @@ string Graph::bfs(string target)
     Q.pop();
 
     if (*t == target)
-      return path + "Arrived at " + target + "\n";
+    {
+      cout << "Arrived at " + target << endl;
+      break;
+    }
 
-    path += "Visited " + t->getValue() + "\n";
+    cout << "Visited " + t->getValue() << endl;
 
     edges = &(t->getEdges());
 
@@ -111,48 +123,125 @@ string Graph::bfs(string target)
     }
   }
 
-  return path;
+  cout << endl;
 }
 
-string Graph::dfs(string target)
+bool Graph::dfsUntil(Node *n, bool visited[], string target)
+{
+  visited[n->getId()] = true;
+
+  if (*n == target)
+  {
+    root = n;
+    cout << "Arrived at " << target << endl
+         << endl;
+    cout << "Starting point is now " << root->getValue() << endl;
+    return true;
+  }
+
+  cout << "Visited " << n->getValue() << endl;
+
+  vector<Node *> *edges = &(n->getEdges());
+
+  for (int i = 0; i < edges->size(); i++)
+  {
+    Node *curr = (*edges)[i];
+
+    if (!visited[curr->getId()] && dfsUntil(curr, visited, target))
+      return true;
+  }
+}
+
+void Graph::dfs(string target)
 {
   bool *visited = new bool[20];
   for (int i = 0; i < 20; i++)
     visited[i] = false;
 
-  stack<Node *> Q;
-  vector<Node *> *edges;
-  string path = "\n";
+  cout << endl;
 
-  Q.push(root);
-  visited[0] = true;
+  dfsUntil(root, visited, target);
 
-  while (!Q.empty())
+  cout << endl;
+}
+
+bool Graph::ldsUntil(Node *n, bool visited[], string target, int limit)
+{
+  visited[n->getId()] = true;
+
+  if (*n == target)
   {
-    Node *t = Q.top();
-
-    Q.pop();
-
-    if (*t == target)
-      return path + "Arrived at " + target + "\n";
-
-    path += "Visited " + t->getValue() + "\n";
-
-    edges = &(t->getEdges());
-    // reverse(edges->begin(), edges->end());
-
-    for (int i = 0; i < edges->size(); ++i)
-    {
-      Node *curr = (*edges)[i];
-      int id = curr->getId();
-
-      if (!visited[id])
-      {
-        visited[id] = true;
-        Q.push(curr);
-      }
-    }
+    cout << "Arrived at " << target << endl;
+    return true;
   }
 
-  return path;
+  cout << "Visited " << n->getValue() << endl;
+
+  if (limit <= 1)
+    return false;
+
+  vector<Node *> *edges = &(n->getEdges());
+  for (auto i = edges->begin(); i != edges->end(); i++)
+  {
+    if (!visited[(*i)->getId()] && ldsUntil(*i, visited, target, limit - 1))
+      return true;
+  }
+
+  return false;
+}
+
+/**
+ * INCOMPLETE SEARCHING ALGORITHM
+ */
+void Graph::lds(string target, int limit)
+{
+  bool *visited = new bool[20];
+  for (int i = 0; i < 20; i++)
+    visited[i] = false;
+
+  cout << endl;
+
+  bool result = ldsUntil(root, visited, target, limit);
+
+  if (!result)
+    cout << "Didn't get to " + target + " before LDS finished... :(" << endl;
+
+  cout << endl;
+}
+
+void Graph::ids(string target, int maxDepth)
+{
+  bool didFind = false;
+
+  cout << endl;
+
+  for (int i = 1; i <= maxDepth; i++)
+  {
+    bool *visited = new bool[20];
+    for (int i = 0; i < 20; i++)
+      visited[i] = false;
+
+    int digits = 0, number = i;
+    while (number != 0)
+    {
+      number /= 10;
+      digits++;
+    }
+
+    cout << "Performing LDS search with depth of " << i << endl;
+    cout << "====================================" << string(digits, '=') << endl;
+
+    if (ldsUntil(root, visited, target, i))
+    {
+      didFind = true;
+      break;
+    }
+
+    cout << endl;
+  }
+
+  if (!didFind)
+    cout << "Didn't get to " + target + " before IDS finished... :(" << endl;
+
+  cout << endl;
 }
