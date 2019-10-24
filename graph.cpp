@@ -1,8 +1,10 @@
 #include <iostream>
 #include <queue>
+#include <stack>
 #include <vector>
 #include <list>
 #include <string>
+#include <algorithm>
 
 #include "graph.h"
 
@@ -78,7 +80,7 @@ string Graph::bfs(string target)
 
   queue<Node *> Q;
   vector<Node *> *edges;
-  string path = "";
+  string path = "\n";
 
   Q.push(root);
   visited[0] = true;
@@ -86,12 +88,13 @@ string Graph::bfs(string target)
   while (!Q.empty())
   {
     Node *t = Q.front();
-    path += "Visited " + t->getValue() + "\n";
 
     Q.pop();
 
     if (*t == target)
-      return path;
+      return path + "Arrived at " + target + "\n";
+
+    path += "Visited " + t->getValue() + "\n";
 
     edges = &(t->getEdges());
 
@@ -111,38 +114,45 @@ string Graph::bfs(string target)
   return path;
 }
 
-string Graph::dfsUntil(Node *n, bool visited[], string target)
-{
-  string path = "";
-
-  vector<Node *> *edges = &(n->getEdges());
-
-  visited[n->getId()] = true;
-  path += "Visited: " + n->getValue() + "\n";
-
-  if (n->getValue() == target)
-  {
-    cout << "damn a match " << n->getValue() << endl;
-    return path;
-  }
-
-  for (int i = 0; i < edges->size(); ++i)
-  {
-    Node *curr = (*edges)[i];
-    if (!visited[curr->getId()])
-      path += dfsUntil(curr, visited, target);
-    if (curr->getValue() == target)
-      break;
-  }
-
-  return path;
-}
-
 string Graph::dfs(string target)
 {
   bool *visited = new bool[20];
   for (int i = 0; i < 20; i++)
     visited[i] = false;
 
-  return dfsUntil(root, visited, target);
+  stack<Node *> Q;
+  vector<Node *> *edges;
+  string path = "\n";
+
+  Q.push(root);
+  visited[0] = true;
+
+  while (!Q.empty())
+  {
+    Node *t = Q.top();
+
+    Q.pop();
+
+    if (*t == target)
+      return path + "Arrived at " + target + "\n";
+
+    path += "Visited " + t->getValue() + "\n";
+
+    edges = &(t->getEdges());
+    // reverse(edges->begin(), edges->end());
+
+    for (int i = 0; i < edges->size(); ++i)
+    {
+      Node *curr = (*edges)[i];
+      int id = curr->getId();
+
+      if (!visited[id])
+      {
+        visited[id] = true;
+        Q.push(curr);
+      }
+    }
+  }
+
+  return path;
 }
